@@ -561,6 +561,7 @@ function Service-Disabler {
     $services = @(
         @{ Alias = "Remote Registry"; Name = "RemoteRegistry"; ToBeDisabled = $true },
         @{ Alias = "RDP"; Name = "TermService"; ToBeDisabled = $true },
+        @{ Alias = "SMB Server"; Name = "LanmanServer"; ToBeDisabled = $true },
         @{ Alias = "Telnet"; Name = "Telnet"; ToBeDisabled = $true },
         @{ Alias = "FTP"; Name = "FTP"; ToBeDisabled = $true },
         @{ Alias = "Web Server"; Name = "W3SVC"; ToBeDisabled = $true }
@@ -691,10 +692,10 @@ function Service-Disabler {
         @{ Alias = "Disable SMB Shares"; Name = "SMB"; ToBeDisabled = $true }
     )
 
-    # Check if these services are running, and if they aren't, we remove them from the $services array
+    # Keep installed services in the list even when stopped so their startup type can be changed.
     foreach ($service in $services) {
         $serviceStatus = Get-Service -Name $service.Name -ErrorAction SilentlyContinue
-        if (-not ($serviceStatus -and $serviceStatus.Status -contains "Running")) {
+        if (-not $serviceStatus) {
             $services = $services | Where-Object { $_.Name -ne $service.Name }
         }
     }
